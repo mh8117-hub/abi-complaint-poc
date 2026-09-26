@@ -1,0 +1,36 @@
+{
+  "run_utc": "20260926T194442Z",
+  "git_commit": "6095019",
+  "endpoint": "http://172.22.42.174:8080/api/chat/completions",
+  "model_requested": "llama-3.1-8b-instruct",
+  "temperature": 0.0,
+  "seed": 42,
+  "prompt_version": "billing-v1",
+  "case_file": "dev_billing_sample.jsonl",
+  "n_cases": 43,
+  "status_counts": {
+    "valid": 43,
+    "invalid": 0,
+    "unparseable": 0,
+    "error": 0
+  },
+  "routing_accuracy": {
+    "all": "29/43 (67%)",
+    "clean_billing": "6/8 (75%)",
+    "fraud_security": "4/8 (50%)",
+    "rule_error": "19/27 (70%)"
+  },
+  "reference_rule_routing_accuracy_same_cases": "16/43 (37%)",
+  "human_review_accuracy_after_rules": "39/43 (91%)",
+  "human_review_recall_on_regulatory_subset_after_rules": "23/23 (100%)",
+  "fraud_concern_agreement": "21/43 (49%)",
+  "regulatory_concern_agreement": "28/43 (65%)",
+  "rule_overrides_fired": 0,
+  "latency_s": {
+    "median": 9.73,
+    "p95": 10.96,
+    "max": 12.13
+  },
+  "client_host": "Lee",
+  "python": "3.12.0"
+}
