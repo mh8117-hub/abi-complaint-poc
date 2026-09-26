@@ -1,49 +1,37 @@
-"""Output contract for the complaint-triage structured output.
+"""Output contract, aligned with Group 1's Gate 2 scope (Team Exercise 3).
 
-Field set mirrors the employee-facing example in the course briefing
-("What You Are Building", p.1): summary, issue, urgency, routing,
-escalation, human review, recommended action -- plus risk flags and a
-short rationale so an employee can inspect *why*.
+Bounded capability: employee-facing intake support for credit-card
+billing disputes. From the complaint narrative alone, produce a
+structured case record, a routing recommendation between two
+destinations, and a human-review flag. The employee decides.
+
+History: commit 55c0d88 used a broader 9-field, 6-queue schema on 8
+synthetic cases (schema/prompt "baseline-v1"). It was replaced here once the
+team's scope and the course dataset were available.
 """
 
-ISSUE_CATEGORIES = [
-    "Fraud or unauthorized transaction",
-    "Billing, fees, or charges dispute",
-    "Account access or login",
-    "Loan or mortgage servicing",
-    "Credit reporting",
-    "Customer service conduct",
-    "Other",
-]
-
-URGENCY_LEVELS = ["Low", "Medium", "High"]
-
-RISK_FLAGS = ["fraud", "regulatory", "privacy", "vulnerable_customer"]
+SCHEMA_VERSION = "billing-v1"
 
 ROUTING_QUEUES = [
-    "Card Fraud and Security",
-    "Billing and Disputes",
-    "Digital Banking Support",
-    "Mortgage and Lending Servicing",
-    "Credit Reporting Disputes",
-    "General Customer Care",
+    "Card Billing Disputes",
+    "Card Fraud & Security",
 ]
 
 # field -> expected python type after normalization
 REQUIRED_FIELDS = {
-    "summary": str,
-    "issue_category": str,
-    "urgency": str,
-    "risk_flags": list,
-    "routing": str,
-    "escalation": bool,
+    "summary": str,                  # structured case record ...
+    "customer_request": str,
+    "disputed_amount": str,          # "not stated" allowed; never invented
+    "prior_contact_attempted": bool,
+    "routing": str,                  # recommendation only
+    "fraud_concern": bool,
+    "regulatory_concern": bool,
     "human_review_required": bool,
-    "recommended_action": str,
     "rationale": str,
 }
 
+BOOL_FIELDS = [k for k, t in REQUIRED_FIELDS.items() if t is bool]
+
 ENUMS = {
-    "issue_category": ISSUE_CATEGORIES,
-    "urgency": URGENCY_LEVELS,
     "routing": ROUTING_QUEUES,
 }

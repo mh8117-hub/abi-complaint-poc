@@ -8,7 +8,7 @@ Pipeline:
   1. extract   - locate a JSON object in the raw text (handles ```json fences,
                  leading/trailing prose, and a trailing comma)
   2. normalize - forgive harmless drift (case, "true"/"yes" strings,
-                 risk_flags given as a string or containing "none")
+                 routing label in a different case)
   3. validate  - required keys, types, enum membership
   4. rules     - deterministic controls applied AFTER the model
                  (the model recommends; rules can only make handling stricter)
@@ -20,7 +20,7 @@ import json
 import re
 from dataclasses import dataclass, field
 
-from .schema import ENUMS, REQUIRED_FIELDS, RISK_FLAGS
+from .schema import BOOL_FIELDS, ENUMS, REQUIRED_FIELDS
 
 
 @dataclass
@@ -91,21 +91,11 @@ def normalize(obj: dict, repairs: list) -> dict:
             if match:
                 out[key] = match[0]
                 repairs.append(f"{key}: case-normalized '{v}'")
-    for key in ("escalation", "human_review_required"):
+    for key in BOOL_FIELDS:
         if key in out:
             out[key], changed = _to_bool(out[key])
             if changed:
                 repairs.append(f"{key}: coerced string to bool")
-    rf = out.get("risk_flags")
-    if isinstance(rf, str):
-        rf = [s.strip() for s in rf.split(",") if s.strip()]
-        repairs.append("risk_flags: split string into list")
-    if isinstance(rf, list):
-        cleaned = [str(x).strip().lower().replace(" ", "_") for x in rf]
-        cleaned = [x for x in cleaned if x not in ("none", "", "n/a")]
-        if cleaned != rf:
-            repairs.append("risk_flags: normalized values")
-        out["risk_flags"] = cleaned
     return out
 
 
@@ -119,9 +109,6 @@ def validate(obj: dict) -> list:
     for key, allowed in ENUMS.items():
         if isinstance(obj.get(key), str) and obj[key] not in allowed:
             errors.append(f"{key}: '{obj[key]}' not in allowed values")
-    for flag in obj.get("risk_flags", []) if isinstance(obj.get("risk_flags"), list) else []:
-        if flag not in RISK_FLAGS:
-            errors.append(f"risk_flags: unknown flag '{flag}'")
     extra = set(obj) - set(REQUIRED_FIELDS)
     if extra:
         errors.append(f"unexpected fields: {sorted(extra)}")
@@ -129,14 +116,18 @@ def validate(obj: dict) -> list:
 
 
 def apply_rules(rec: dict, overrides: list) -> dict:
-    """Deterministic controls. They can only tighten handling, never relax it."""
-    flags = set(rec.get("risk_flags", []))
-    if flags & {"fraud", "regulatory", "vulnerable_customer"} and not rec.get("human_review_required"):
+    """Deterministic controls (team plan P4: non-bypassable review rule).
+    They can only tighten handling, never relax it; routing is left to the
+    model because routing is what the PoC is testing."""
+    if rec.get("regulatory_concern") and not rec.get("human_review_required"):
         rec["human_review_required"] = True
-        overrides.append("R1: fraud/regulatory/vulnerable flag -> human_review_required=true")
-    if rec.get("urgency") == "High" and not rec.get("escalation"):
-        rec["escalation"] = True
-        overrides.append("R2: urgency High -> escalation=true")
+        overrides.append("R1: regulatory_concern -> human_review_required=true")
+    if rec.get("fraud_concern") and not rec.get("human_review_required"):
+        rec["human_review_required"] = True
+        overrides.append("R2: fraud_concern -> human_review_required=true")
+    if rec.get("routing") == "Card Fraud & Security" and not rec.get("human_review_required"):
+        rec["human_review_required"] = True
+        overrides.append("R3: fraud routing -> human_review_required=true")
     return rec
 
 
