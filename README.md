@@ -16,7 +16,7 @@ narrative -> prompt (billing-v1, zero-shot) -> Open WebUI on DGX Spark (Llama-3.
 | `complaint_triage/schema.py` | Output contract: 9-field case record, 2 routing destinations |
 | `complaint_triage/prompt.py` | Baseline system prompt (zero-shot, no examples) |
 | `complaint_triage/client.py` | Open WebUI client, standard library only |
-| `complaint_triage/parser.py` | Parses raw model text into a validated record or a logged failure; applies rules R1/R2 |
+| `complaint_triage/parser.py` | Parses raw model text into a validated record or a logged failure; applies review rules R1–R3 |
 | `scripts/make_dev_sample.py` | Builds the 43-case DEVELOPMENT sample (all 27 rule-error cases + 8 clean billing + 8 fraud, seed 7) from the course CSV; refuses the held-out file |
 | `cases/dev_billing_sample_ids.txt` | The exact course_record_ids used (the course data itself is not committed) |
 | `run_cases.py` | Runs the cases and writes evidence |
@@ -61,6 +61,6 @@ Routing itself is left to the model, because routing is what the PoC tests.
 ## Known limits
 - The labels are rule-generated synthetic course labels (label_provenance), not bank ground truth.
 - The 43-case sample over-represents the 27 rule-error cases on purpose (plan P3). Its overall accuracy is not an estimate of accuracy on all 653 cases.
-- Commit 6ec4435 holds an earlier run on 8 synthetic cases with a broader schema (baseline-v1).
+- `evidence/synthetic_smoke_test/` holds an earlier run on 8 synthetic cases with a broader schema (baseline-v1, code 55c0d88).
 - The parser fixes formatting drift only. It never guesses a missing or off-list category, so those outputs are recorded as `invalid`.
 - `temperature=0` and `seed=42` are requested, but whether the backend honours the seed was not verified.
