@@ -1,0 +1,24 @@
+{
+  "run_utc": "20260926T144923Z",
+  "git_commit": "55c0d88",
+  "endpoint": "http://172.22.42.174:8080/api/chat/completions",
+  "model_requested": "llama-3.1-8b-instruct",
+  "temperature": 0.0,
+  "seed": 42,
+  "prompt_version": "baseline-v1",
+  "n_cases": 8,
+  "status_counts": {
+    "valid": 8,
+    "invalid": 0,
+    "unparseable": 0,
+    "error": 0
+  },
+  "field_accuracy_on_valid": {
+    "issue_category": "7/8",
+    "urgency": "4/8",
+    "routing": "7/8",
+    "human_review_required": "6/8"
+  },
+  "client_host": "Lee",
+  "python": "3.12.0"
+}
