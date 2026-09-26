@@ -4,6 +4,11 @@ Open WebUI exposes an OpenAI-style chat endpoint at  POST /api/chat/completions
 (NOT /v1/chat/completions) with header  Authorization: Bearer <API key>.
 Source: https://docs.openwebui.com/getting-started/api-endpoints/
 The key is created in Open WebUI: Settings > Account > API Keys.
+
+BLOCKER FOUND ON THE COURSE DGX (Open WebUI v0.11.3, 2026-09-26): API keys are
+disabled by the admin, so Settings > Account has no API Keys section. The docs
+also allow a JWT (the browser session token, localStorage.token), which is
+sent the same way as a Bearer token. Put either value in OPENWEBUI_API_KEY.
 """
 
 from __future__ import annotations
@@ -21,9 +26,9 @@ class OpenWebUIClient:
         self.api_key = api_key or os.environ.get("OPENWEBUI_API_KEY", "")
         self.timeout = timeout
         if not self.base_url:
-            raise ValueError("Set OPENWEBUI_BASE_URL (e.g. http://<dgx-host>:8080)")
+            raise ValueError("Set OPENWEBUI_BASE_URL (course DGX: http://172.22.42.174:8080)")
         if not self.api_key:
-            raise ValueError("Set OPENWEBUI_API_KEY (Open WebUI > Settings > Account > API Keys)")
+            raise ValueError("Set OPENWEBUI_API_KEY to an API key or, if keys are disabled, the JWT from localStorage.token")
 
     def _request(self, method: str, path: str, body: dict | None = None) -> dict:
         data = json.dumps(body).encode("utf-8") if body is not None else None

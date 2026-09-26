@@ -29,7 +29,7 @@ python -m unittest discover -s tests -v          # offline check
 
 # Windows PowerShell
 $env:OPENWEBUI_BASE_URL="http://<open-webui-host>"   # the address you open in the browser
-$env:OPENWEBUI_API_KEY="sk-..."                      # Open WebUI > Settings > Account > API Keys
+$env:OPENWEBUI_API_KEY="sk-... or eyJ..."           # API key, or JWT if keys are disabled (see below)
 # macOS/Linux: export OPENWEBUI_BASE_URL=...; export OPENWEBUI_API_KEY=...
 
 python run_cases.py --list-models                # copy the exact model id
@@ -38,6 +38,9 @@ python run_cases.py --model "<exact id>"
 
 ## Verified API facts
 Open WebUI's chat endpoint is `POST /api/chat/completions`, not the OpenAI-style `/v1/chat/completions`. Authentication uses `Authorization: Bearer <key>`. Models are listed with `GET /api/models`. Source: https://docs.openwebui.com/getting-started/api-endpoints/. The docs do not document `response_format` JSON mode, so this component does not rely on it. JSON is requested in the prompt and enforced by the parser.
+
+## Blocker and workaround (course DGX)
+On the course Open WebUI (v0.11.3 at 172.22.42.174:8080), API keys are disabled by the admin: Settings > Account shows no API Keys section. The documented alternative is the user's JWT. To get it, open the site while logged in, press F12, and in the Console type `localStorage.token`. Put the value in `OPENWEBUI_API_KEY`. The JWT expires and is tied to a personal login, so it is fine for a PoC but not for a shared service. The team should ask the course admin for a service API key.
 
 ## Deterministic rules (run after the model; they can only make handling stricter)
 - **R1**: a `fraud`, `regulatory` or `vulnerable_customer` flag sets `human_review_required=true`.
