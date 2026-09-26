@@ -25,11 +25,12 @@ Python 3.8 or later. No third-party packages. You need the NYU VPN ("NYU-NET Tra
 ## Reproduce
 ```bash
 git clone <repo> && cd abi-complaint-poc && git checkout candidate/mh8117-structured-parser
-python -m unittest discover -s tests -v          # offline check
+python -m unittest discover -s tests -v          # offline check (Windows: use `py` if `python` opens the Microsoft Store)
 
 # Windows PowerShell
 $env:OPENWEBUI_BASE_URL="http://<open-webui-host>"   # the address you open in the browser
-$env:OPENWEBUI_API_KEY="sk-... or eyJ..."           # API key, or JWT if keys are disabled (see below)
+py login_helper.py                                 # signs in and stores the token (password is not echoed)
+$env:OPENWEBUI_API_KEY=[Environment]::GetEnvironmentVariable("OPENWEBUI_API_KEY","User")
 # macOS/Linux: export OPENWEBUI_BASE_URL=...; export OPENWEBUI_API_KEY=...
 
 python run_cases.py --list-models                # copy the exact model id
